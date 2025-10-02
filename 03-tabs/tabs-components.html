@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système d'Onglets - Web Components</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        tabs-container {
+            display: block;
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .tabs-list {
+            display: flex;
+            border-bottom: 1px solid #ccc;
+            background-color: #f8f8f8;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 10px 20px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .tab-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .tab-button:focus {
+            outline: 2px solid #007BFF;
+            outline-offset: -2px;
+        }
+
+        .tab-button[aria-selected="true"] {
+            background-color: #fff;
+            font-weight: bold;
+            color: #007BFF;
+            border-bottom: 3px solid #007BFF;
+        }
+
+        .tabs-panels {
+            padding: 20px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel[aria-hidden="false"] {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; color: #007BFF;">Système d'Onglets avec Web Components</h1>
+
+    <tabs-container>
+        <tab-item label="Onglet 1">
+            <h2>Contenu de l'onglet 1</h2>
+            <p>Ceci est le contenu du premier onglet. Vous pouvez y mettre n'importe quel contenu HTML.</p>
+        </tab-item>
+        
+        <tab-item label="Onglet 2">
+            <h2>Contenu de l'onglet 2</h2>
+            <p>Ce composant utilise des Web Components natifs pour une meilleure encapsulation et réutilisabilité.</p>
+        </tab-item>
+        
+        <tab-item label="Onglet 3">
+            <h2>Contenu de l'onglet 3</h2>
+            <ul>
+                <li>Accessible (ARIA attributes)</li>
+                <li>Navigation au clavier</li>
+                <li>Réutilisable</li>
+            </ul>
+        </tab-item>
+    </tabs-container>
+
+    <script>
+        // Custom Element pour un élément d'onglet
+        class TabItem extends HTMLElement {
+            connectedCallback() {
+                this.style.display = 'contents';
+            }
+
+            get label() {
+                return this.getAttribute('label') || 'Tab';
+            }
+        }
+
+        // Custom Element pour le conteneur d'onglets
+        class TabsContainer extends HTMLElement {
+            constructor() {
+                super();
+                this.currentTab = 0;
+            }
+
+            connectedCallback() {
+                this.render();
+                this.setupEventListeners();
+                this.setupKeyboardNavigation();
+            }
+
+            render() {
+                const tabs = Array.from(this.querySelectorAll('tab-item'));
+                
+                // Créer la liste des boutons d'onglets
+                const tabsList = document.createElement('div');
+                tabsList.className = 'tabs-list';
+                tabsList.setAttribute('role', 'tablist');
+
+                // Créer le conteneur des panneaux
+                const panelsContainer = document.createElement('div');
+                panelsContainer.className = 'tabs-panels';
+
+                tabs.forEach((tab, index) => {
+                    // Créer le bouton d'onglet
+                    const button = document.createElement('button');
+                    button.className = 'tab-button';
+                    button.textContent = tab.label;
+                    button.setAttribute('role', 'tab');
+                    button.setAttribute('id', `tab-${index}`);
+                    button.setAttribute('aria-controls', `panel-${index}`);
+                    button.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+                    button.setAttribute('tabindex', index === 0 ? '0' : '-1');
+                    button.dataset.index = index;
+                    
+                    tabsList.appendChild(button);
+
+                    // Créer le panneau de contenu
+                    const panel = document.createElement('div');
+                    panel.className = 'tab-panel';
+                    panel.setAttribute('role', 'tabpanel');
+                    panel.setAttribute('id', `panel-${index}`);
+                    panel.setAttribute('aria-labelledby', `tab-${index}`);
+                    panel.setAttribute('aria-hidden', index === 0 ? 'false' : 'true');
+                    panel.innerHTML = tab.innerHTML;
+                    
+                    panelsContainer.appendChild(panel);
+                });
+
+                // Vider le conteneur et ajouter les nouveaux éléments
+                this.innerHTML = '';
+                this.appendChild(tabsList);
+                this.appendChild(panelsContainer);
+
+                this.tabButtons = this.querySelectorAll('.tab-button');
+                this.tabPanels = this.querySelectorAll('.tab-panel');
+            }
+
+            setupEventListeners() {
+                this.tabButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        this.switchTab(index);
+                    });
+                });
+            }
+
+            setupKeyboardNavigation() {
+                this.addEventListener('keydown', (e) => {
+                    if (!e.target.classList.contains('tab-button')) return;
+
+                    let newIndex = this.currentTab;
+                    
+                    switch(e.key) {
+                        case 'ArrowRight':
+                            e.preventDefault();
+                            newIndex = (this.currentTab + 1) % this.tabButtons.length;
+                            break;
+                        case 'ArrowLeft':
+                            e.preventDefault();
+                            newIndex = (this.currentTab - 1 + this.tabButtons.length) % this.tabButtons.length;
+                            break;
+                        case 'Home':
+                            e.preventDefault();
+                            newIndex = 0;
+                            break;
+                        case 'End':
+                            e.preventDefault();
+                            newIndex = this.tabButtons.length - 1;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    this.switchTab(newIndex);
+                    this.tabButtons[newIndex].focus();
+                });
+            }
+
+            switchTab(index) {
+                // Désactiver tous les onglets
+                this.tabButtons.forEach((btn, i) => {
+                    btn.setAttribute('aria-selected', i === index ? 'true' : 'false');
+                    btn.setAttribute('tabindex', i === index ? '0' : '-1');
+                });
+
+                // Masquer tous les panneaux et afficher le bon
+                this.tabPanels.forEach((panel, i) => {
+                    panel.setAttribute('aria-hidden', i === index ? 'false' : 'true');
+                });
+
+                this.currentTab = index;
+
+                // Émettre un événement personnalisé
+                this.dispatchEvent(new CustomEvent('tab-changed', {
+                    detail: { index, label: this.tabButtons[index].textContent }
+                }));
+            }
+        }
+
+        // Enregistrer les Custom Elements
+        customElements.define('tab-item', TabItem);
+        customElements.define('tabs-container', TabsContainer);
+
+        // Exemple d'utilisation de l'événement personnalisé
+        document.querySelector('tabs-container').addEventListener('tab-changed', (e) => {
+            console.log(`Onglet changé: ${e.detail.label} (index: ${e.detail.index})`);
+        });
+    </script>
+</body>
+</html>
