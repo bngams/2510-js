@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise 8: HTTP</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8">Exercise 8: HTTP</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Products</h2>
+            <div id="products-containter" class="space-y-4 flex flex-row flex-wrap gap-4">
+                Loading products...
+                <!-- <product-card name="Laptop Rpi mini" price="19.99" image="https://placehold.co/150"></product-card> -->
+                <!-- <product-card name="Laptop Rpi mini" price="19.99" image="https://placehold.co/150"></product-card> -->
+                <!-- produits chargés en JS/API HTTP-->
+            </div>
+        </div>
+
+        <a href="../index.html" class="text-blue-500 hover:underline">&larr; Back to menu</a>
+    </div>
+
+    <script>
+        // TODO: Create a custom element for product cards
+        // class ProductCard qui hérite de HTMLElement (extends)
+        class ProductCard extends HTMLElement {
+            qty = 0;
+
+            constructor() {
+                super();
+                this.attachShadow({ mode: 'open' });
+            }
+
+            connectedCallback() {
+                const name = this.getAttribute('name');
+                const price = this.getAttribute('price');
+                const image = this.getAttribute('image');
+
+                this.shadowRoot.innerHTML = `
+                    <style>
+                        .card {
+                            border: 1px solid #ccc;
+                            border-radius: 8px;
+                            padding: 16px;
+                            text-align: center;
+                            max-width: 300px;
+                        }
+                        .card:hover {
+                            background-color: #f9f9f9;
+                        }
+                        img {
+                            max-width: 100%;
+                            height: auto;
+                            border-radius: 4px;
+                        }
+                        h3 {
+                            margin: 8px 0;
+                        }
+                        .qty {
+                            font-weight: bold;
+                            color: #555;
+                            display: none;
+                        }
+                    </style>
+                    <div class="card">
+                        <img src="${image}" alt="${name}">
+                        <h3>${name}</h3>
+                        <p>$${price}</p>
+                        <button class="add-to-cart bg-blue-500 text-white px-4 py-2 rounded">Add to Cart <span class="qty">(0)</span></button> 
+                    </div>
+                `;
+
+                this.shadowRoot.querySelector('.add-to-cart').addEventListener('click', () => {
+                    this.qty++;
+                    const qtyElement = this.shadowRoot.querySelector('.qty');
+                    qtyElement.textContent = `(${this.qty})`;
+                    qtyElement.style.display = 'inline';
+                });
+
+            }
+        }
+        // creation de la balise
+        customElements.define('product-card', ProductCard);
+
+        async function fetchProducts() {
+            // Fetch data from https://dummyjson.com/products?limit=5
+            const response = await fetch('https://dummyjson.com/products?limit=5');
+
+            if(!response.ok) {
+                console.error("Erreur lors de la récupération des données");
+            }
+            // get data from response => parse response json (/!\ async)
+            const data = await response.json();
+            
+            // Parcourir les données récupérées et ajouter des éléments <product-card> dans le DOM
+            // target the products container div
+            const container = document.getElementById('products-containter');
+            // Clear loading text
+            container.innerHTML = ''; 
+            // Loop through the products and create product-card elements
+            data.products.forEach(product => {
+                // with innerHTML
+                // const card = `<product-card name="${product.name}" price="${product.price}" image="${product.thumbnail}"></product-card>`;
+                // container.innerHTML += card;
+
+                // with API DOM Element
+                const cardElement = document.createElement('product-card');
+                cardElement.setAttribute('name', product.name);
+                cardElement.setAttribute('price', product.price);
+                cardElement.setAttribute('image', product.thumbnail);
+                container.appendChild(cardElement);
+            })          
+
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("DOM fully loaded and parsed");
+            loadProducts();
+        });
+
+        function loadProducts() {            
+            fetchProducts().then(() => {
+                console.log("Products fetched and displayed");
+            }).catch(error => {
+                console.error("Error fetching products:", error);
+            });
+        }
+
+    </script>
+</body>
+</html>

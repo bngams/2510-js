@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise 6: Events</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8">Exercise 6: Events</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Color Changer</h2>
+            <div class="space-y-4">
+                <div id="colorBox" class="w-full h-32 bg-gray-200 rounded cursor-pointer flex items-center justify-center">
+                    <p>Click me to change color!</p>
+                </div>
+                <button onclick="resetColorWithStyles()" class="bg-blue-500 text-white px-4 py-2 rounded">Reset Color</button>
+            </div>
+        </div>
+
+        <a href="../index.html" class="text-blue-500 hover:underline">&larr; Back to menu</a>
+    </div>
+
+    <script>
+        // TODO: Complete these functions
+        const colorBox = document.getElementById('colorBox');
+        
+        colorBox.addEventListener('click', function() {
+            resetColorWithStyles();
+        });
+
+        function resetColorWithCSSClasses() {
+            const colors = ['bg-red-500', 'bg-green-500', 'bg-blue-500', 'bg-yellow-500', 'bg-purple-500'];
+            const currentColor = colorBox.classList[1];
+            let newColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            while (newColor === currentColor) {
+            newColor = colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            colorBox.classList.remove(currentColor);
+            colorBox.classList.add(newColor);
+            colorBox.classList.add('text-white px-4 py-2 rounded');
+        }
+
+        function resetColorWithStyles() {
+            const colors = ['red', 'green', 'blue', 'yellow', 'purple'];
+            const currentColor = colorBox.style.backgroundColor;
+            let newColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            while (newColor === currentColor) {
+            newColor = colors[Math.floor(Math.random() * colors.length)];
+            }
+            
+            colorBox.style.backgroundColor = newColor;
+            colorBox.style.color = 'white';
+            colorBox.style.padding = '1rem';
+            colorBox.style.borderRadius = '0.5rem';
+        }
+    </script>
+</body>
+</html>

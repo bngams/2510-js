@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise 7: Custom element</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold mb-8">Exercise 7: Custom element</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Products</h2>
+            <div class="space-y-4 flex flex-row flex-wrap gap-4">
+                <product-card name="Laptop Rpi mini" price="19.99" image="https://placehold.co/150"></product-card>
+                <product-card name="Laptop Rpi micro" price="9.99" image="https://placehold.co/150"></product-card>
+            </div>
+        </div>
+
+        <a href="../index.html" class="text-blue-500 hover:underline">&larr; Back to menu</a>
+    </div>
+
+    <script>
+        // TODO: Create a custom element for product cards
+        // class ProductCard qui hérite de HTMLElement (extends)
+        class ProductCard extends HTMLElement {
+            qty = 0;
+
+            constructor() {
+                super();
+                this.attachShadow({ mode: 'open' });
+            }
+
+            connectedCallback() {
+                const name = this.getAttribute('name');
+                const price = this.getAttribute('price');
+                const image = this.getAttribute('image');
+
+                this.shadowRoot.innerHTML = `
+                    <style>
+                        .card {
+                            border: 1px solid #ccc;
+                            border-radius: 8px;
+                            padding: 16px;
+                            text-align: center;
+                            max-width: 300px;
+                        }
+                        .card:hover {
+                            background-color: #f9f9f9;
+                        }
+                        img {
+                            max-width: 100%;
+                            height: auto;
+                            border-radius: 4px;
+                        }
+                        h3 {
+                            margin: 8px 0;
+                        }
+                        .qty {
+                            font-weight: bold;
+                            color: #555;
+                            display: none;
+                        }
+                    </style>
+                    <div class="card">
+                        <img src="${image}" alt="${name}">
+                        <h3>${name}</h3>
+                        <p>$${price}</p>
+                        <button class="add-to-cart bg-blue-500 text-white px-4 py-2 rounded">Add to Cart <span class="qty">(0)</span></button> 
+                    </div>
+                `;
+
+                if(price < 10) {
+                    this.shadowRoot.querySelector('.card').addEventListener('mouseover', () => {
+                      this.shadowRoot.querySelector('.card').style.backgroundColor = 'yellow';
+                    });
+                    this.shadowRoot.querySelector('.card').addEventListener('mouseout', () => {
+                      this.shadowRoot.querySelector('.card').style.backgroundColor = '';
+                    });
+                }
+
+                this.shadowRoot.querySelector('.add-to-cart').addEventListener('click', () => {
+                    this.qty++;
+                    const qtyElement = this.shadowRoot.querySelector('.qty');
+                    qtyElement.textContent = `(${this.qty})`;
+                    qtyElement.style.display = 'inline';
+                });
+
+            }
+        }
+        // creation de la balise
+        customElements.define('product-card', ProductCard);
+    </script>
+</body>
+</html>

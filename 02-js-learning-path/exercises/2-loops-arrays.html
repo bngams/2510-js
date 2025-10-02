@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Exercise 2: Loops and Arrays</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+      <h1 class="text-4xl font-bold mb-8">Exercise 2: Loops and Arrays</h1>
+
+      <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+        <h2 class="text-2xl font-semibold mb-4">Array Operations</h2>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-gray-700 mb-2"
+              >Enter numbers (comma-separated):</label
+            >
+            <input
+              type="text"
+              id="numbers"
+              class="numbers w-full p-2 border rounded"
+              placeholder="1,2,3,4,5"
+            />
+          </div>
+          <div class="space-x-2">
+            <button
+              onclick="calculateSum()"
+              class="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Calculate Sum
+            </button>
+            <button
+              onclick="findMax()"
+              class="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Find Maximum
+            </button>
+            <button
+              onclick="filterEven()"
+              class="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Filter Even Numbers
+            </button>
+          </div>
+          <div>
+            <p class="text-xl">Result: <span id="result">-</span></p>
+          </div>
+        </div>
+      </div>
+
+      <a href="../index.html" class="text-blue-500 hover:underline"
+        >&larr; Back to menu</a
+      >
+    </div>
+
+    <script>
+      function getArrayValues() {
+        const textValue = document.querySelector("#numbers").value;
+        const arrayValues = textValue.split(",");
+        return arrayValues;
+      }
+
+      function getArrayValuesAsNumbers() {
+        return getArrayValues().map((stringValue) => {
+            return Number(item);
+        });
+      }
+
+      function displayResult(result) {
+        document.querySelector("#result").textContent = result;
+      }
+
+      // TODO: Complete these functions
+      function calculateSumWithSimpleFor() {
+        let total = 0;
+        const myArray = getArrayValues();
+        for (const element of myArray) {
+          total += Number(element); // cast with Number or ParseInt(element)
+        }
+        displayResult(sum);
+      }
+
+      function calculateSumFromStringArray() {
+        const myArray = getArrayValues().map(Number);
+        const sum = myArray.reduce((acc, num) => acc + num, 0);
+        displayResult(sum);
+      }
+
+      function calculateSum() {
+        const sum = getArrayValuesAsNumbers().reduce((acc, num) => acc + num, 0);
+        displayResult(sum);
+      }
+
+      function findMax() {
+        // spread operator to pass array as individual arguments
+        const max = Math.max(...getArrayValuesAsNumbers());
+        displayResult(max);
+      }
+
+      function filterEven() {
+        const evenNumbers = getArrayValuesAsNumbers().filter((num) => num % 2 === 0);
+        document.querySelector("#result").textContent = evenNumbers.join(", ");
+      }
+    </script>
+  </body>
+</html>
